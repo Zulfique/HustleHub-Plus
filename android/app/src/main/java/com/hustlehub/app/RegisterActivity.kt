@@ -11,13 +11,14 @@ import com.google.gson.Gson
 import com.hustlehub.app.api.ApiClient
 import com.hustlehub.app.databinding.ActivityRegisterBinding
 import com.hustlehub.app.model.RegisterRequest
+import com.hustlehub.app.security.AuthStore
 import com.hustlehub.app.security.TokenManager
 import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
-    private lateinit var tokenManager: TokenManager
+    private lateinit var authStore: AuthStore
     private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,13 +26,15 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        tokenManager = TokenManager(this)
+        authStore = TokenManager(this)
 
         setupRoleSpinner()
 
         binding.btnRegister.setOnClickListener { handleRegister() }
         binding.tvGoLogin.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(Intent(this, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            })
             finish()
         }
     }
@@ -63,10 +66,12 @@ class RegisterActivity : AppCompatActivity() {
                 val response = ApiClient.apiService.register(
                     RegisterRequest(name, email, password, role)
                 )
-                tokenManager.saveAuthData(response.data.token, gson.toJson(response.data.user))
+                authStore.saveAuthData(response.data.token, response.data.user)
                 showError(null)
                 Toast.makeText(this@RegisterActivity, "Account created!", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
+                startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                })
                 finish()
             } catch (e: Exception) {
                 showError(ApiClient.parseErrorMessage(e))
@@ -84,15 +89,15 @@ class RegisterActivity : AppCompatActivity() {
         confirm: String
     ): String? {
         return when {
-            TextUtils.isEmpty(name) -> "Full name is required"
-            TextUtils.isEmpty(email) -> "Email address is required"
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Enter a valid email address"
-            password.length < 8 -> "Password must be at least 8 characters"
-            !password.any { it.isUpperCase() } -> "Password must contain an uppercase letter"
-            !password.any { it.isLowerCase() } -> "Password must contain a lowercase letter"
-            !password.any { it.isDigit() } -> "Password must contain a number"
-            !password.any { "!@#\$%^&*(),.?\":{}|<>".contains(it) } -> "Password must contain a special character"
-            password != confirm -> "Passwords do not match"
+            TextUtils.isEmpty(name) -> getString(R.string.validation_name_required)
+            TextUtils.isEmpty(email) -> getString(R.string.validation_email_required)
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> getString(R.string.validation_email_valid)
+            password.length < 8 -> getString(R.string.validation_password_minimum)
+            !password.any { it.isUpperCase() } -> getString(R.string.validation_password_uppercase)
+            !password.any { it.isLowerCase() } -> getString(R.string.validation_password_lowercase)
+            !password.any { it.isDigit() } -> getString(R.string.validation_password_digit)
+            !password.any { "!@#$%^&*(),.?\":{}|<>".contains(it) } -> getString(R.string.validation_password_special)
+            password != confirm -> getString(R.string.validation_password_mismatch)
             else -> null
         }
     }

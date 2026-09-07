@@ -10,13 +10,14 @@ import com.google.gson.Gson
 import com.hustlehub.app.api.ApiClient
 import com.hustlehub.app.databinding.ActivityLoginBinding
 import com.hustlehub.app.model.LoginRequest
+import com.hustlehub.app.security.AuthStore
 import com.hustlehub.app.security.TokenManager
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var tokenManager: TokenManager
+    private lateinit var authStore: AuthStore
     private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,11 +25,13 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        tokenManager = TokenManager(this)
+        authStore = TokenManager(this)
 
         binding.btnLogin.setOnClickListener { handleLogin() }
         binding.tvGoRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+            startActivity(Intent(this, RegisterActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            })
         }
     }
 
@@ -48,10 +51,12 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = ApiClient.apiService.login(LoginRequest(email, password))
-                tokenManager.saveAuthData(response.data.token, gson.toJson(response.data.user))
+                authStore.saveAuthData(response.data.token, response.data.user)
                 showError(null)
                 Toast.makeText(this@LoginActivity, "Welcome, ${response.data.user.name}!", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
+                startActivity(Intent(this@LoginActivity, DashboardActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                })
                 finish()
             } catch (e: Exception) {
                 showError(ApiClient.parseErrorMessage(e))
@@ -64,9 +69,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun validateInput(email: String, password: String): String? {
         return when {
-            TextUtils.isEmpty(email) -> "Email address is required"
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Enter a valid email address"
-            TextUtils.isEmpty(password) -> "Password is required"
+            TextUtils.isEmpty(email) -> getString(R.string.validation_email_required)
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> getString(R.string.validation_email_valid)
+            TextUtils.isEmpty(password) -> getString(R.string.validation_password_required)
             else -> null
         }
     }
