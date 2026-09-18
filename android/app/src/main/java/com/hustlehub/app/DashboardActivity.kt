@@ -69,9 +69,13 @@ class DashboardActivity : AppCompatActivity() {
         binding.tvUserName.text = getString(R.string.welcome_back, user.name)
 
         val token = authStore.getToken()
-        binding.tvToken.text = token?.let {
-            if (it.length > 60) it.substring(0, 60) + "..." else it
-        } ?: getString(R.string.no_token)
+        if (BuildConfig.DEBUG) {
+            binding.tvToken.text = token?.let {
+                if (it.length > 60) it.substring(0, 60) + "..." else it
+            } ?: getString(R.string.no_token)
+        } else {
+            binding.tvToken.text = getString(R.string.no_token)
+        }
     }
 
     private fun fetchProfile() {

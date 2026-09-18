@@ -5,8 +5,6 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
-import java.nio.charset.Charsets
-import android.util.Base64
 
 class TokenManager(context: Context) : AuthStore {
 
@@ -50,20 +48,4 @@ class TokenManager(context: Context) : AuthStore {
     }
 
     fun isLoggedIn(): Boolean = getToken() != null && getUser() != null
-
-    private fun jwtExpirySeconds(token: String): Long? {
-        return try {
-            val parts = token.split(".", limit = 3)
-            if (parts.size != 3) return null
-            val payload = parts[1]
-                .replace("-", "+")
-                .replace("_", "/")
-                + "=".repeat((4 - payload.length % 4) % 4)
-            val json = String(
-                Base64.decode(payload, Base64.DEFAULT),
-                Charsets.UTF_8
-            )
-            gson.fromJson(json, com.google.gson.JsonObject::class.java).get("exp")?.asLong
-        } catch (_: Exception) { null }
-    }
 }

@@ -21,7 +21,7 @@ android {
             buildConfigField(
                 "String",
                 "HUSTLEHUB_BASE_URL",
-                "\"https://10.0.2.2:3443/\"
+                "\"https://10.0.2.2:3443/\""
             )
         }
         release {
@@ -29,7 +29,7 @@ android {
             buildConfigField(
                 "String",
                 "HUSTLEHUB_BASE_URL",
-                "\"https://api.example.com/\"
+                "\"https://api.example.com/\""
             )
         }
     }

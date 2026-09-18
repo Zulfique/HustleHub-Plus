@@ -2,21 +2,13 @@ package com.hustlehub.app.api
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.hustlehub.app.HustleHubApplication
-import com.hustlehub.app.R
 import com.hustlehub.app.model.ErrorResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.HttpException
-import java.security.KeyStore
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
 
 object ApiClient {
 
