@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.google.gson.Gson
+import java.nio.charset.Charsets
+import android.util.Base64
 
 class TokenManager(context: Context) : AuthStore {
 
@@ -24,80 +27,43 @@ class TokenManager(context: Context) : AuthStore {
     private val savedAtKey = "saved_at"
     private val ttlMs = 3600 * 1000L // 1 hour TTL
 
-    fun saveAuthData(token: String, userJson: String) {
+    private val gson = Gson()
+
+    fun saveAuthData(token: String, user: User) {
         prefs.edit()
             .putString(jwtTokenKey, token)
-            .putString(userKey, userJson)
+            .putString(userKey, gson.toJson(user))
             .putLong(savedAtKey, System.currentTimeMillis())
             .apply()
     }
 
     fun getToken(): String? = prefs.getString(jwtTokenKey, null)
 
-    fun getUserJson(): String? = prefs.getString(userKey, null)
+    fun getUser(): User? {
+        val json = prefs.getString(userKey, null) ?: return null
+        return try { gson.fromJson(json, User::class.java) }
+        catch (_: Exception) { null }
+    }
 
     fun clear() {
         prefs.edit().clear().apply()
     }
 
-    fun isLoggedIn(): Boolean {
-        val token = getToken() ?: return false
+    fun isLoggedIn(): Boolean = getToken() != null && getUser() != null
 
-        // Check token expiry using JWT exp claim
-        try {
-            val parts = token.split('.')
-            if (parts.size != 3) {
-                clear()
-                return false
-            }
+    private fun jwtExpirySeconds(token: String): Long? {
+        return try {
+            val parts = token.split(".", limit = 3)
+            if (parts.size != 3) return null
             val payload = parts[1]
-            // Add standard base64 padding
-            val padded = payload + "=".repeat((4 - payload.length % 4) % 4)
-            val decodedJson = java.util.Base64.getDecoder().decode(padded)
-            val jsonStr = String(decodedJson)
-            val expIndex = jsonStr.indexOf("\"exp\"")
-            if (expIndex >= 0) {
-                val expValueStart = jsonStr.indexOf(':', expIndex) + 1
-                val expValueEnd = jsonStr.indexOf(',', expValueStart)
-                val expStr = if (expValueEnd >= 0) {
-                    jsonStr.substring(expValueStart, expValueEnd).trim()
-                } else {
-                    val braceEnd = jsonStr.indexOf('}', expValueStart)
-                    jsonStr.substring(expValueStart, braceEnd).trim()
-                }
-                val expLong = expStr.toLong()
-                val nowLong = System.currentTimeMillis() / 1000L
-                if (expLong <= nowLong) {
-                    // Token is expired
-                    clear()
-                    return false
-                }
-            } else {
-                // No exp claim - use storage age fallback
-                val savedAt = prefs.getLong(savedAtKey, 0L)
-                val storageAge = System.currentTimeMillis() - savedAt
-                if (storageAge > ttlMs) {
-                    clear()
-                    return false
-                }
-            }
-        } catch (e: Exception) {
-            // If we can't decode the token, use storage age fallback
-            val savedAt = prefs.getLong(savedAtKey, 0L)
-            val storageAge = System.currentTimeMillis() - savedAt
-            if (savedAt > 0 && storageAge > ttlMs) {
-                clear()
-                return false
-            }
-        }
-
-        return true
-    }
-
-    companion object {
-        private const val KEY_TOKEN = "jwt_token"
-        private const val KEY_USER = "user_data"
-        private const val KEY_SAVED_AT = "saved_at"
-        private const val TOKEN_TTL_MS = 3600 * 1000L
+                .replace("-", "+")
+                .replace("_", "/")
+                + "=".repeat((4 - payload.length % 4) % 4)
+            val json = String(
+                Base64.decode(payload, Base64.DEFAULT),
+                Charsets.UTF_8
+            )
+            gson.fromJson(json, com.google.gson.JsonObject::class.java).get("exp")?.asLong
+        } catch (_: Exception) { null }
     }
 }
