@@ -57,12 +57,8 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun displayCachedUser() {
-        val userJson = authStore.getUserJson() ?: return
-        try {
-            val user = gson.fromJson(userJson, User::class.java)
-            populateUser(user)
-        } catch (_: Exception) {
-        }
+        val user = authStore.getUser() ?: return
+        populateUser(user)
     }
 
     private fun populateUser(user: User) {
@@ -92,7 +88,7 @@ class DashboardActivity : AppCompatActivity() {
             try {
                 val response = ApiClient.apiService.profile("Bearer $token")
                 populateUser(response.data.user)
-                authStore.saveAuthData(token, gson.toJson(response.data.user))
+                authStore.saveAuthData(token, response.data.user)
                 binding.tvConnection.text = getString(R.string.connection_connected)
                 binding.tvConnection.setTextColor(resources.getColor(R.color.hustlehub_success, null))
             } catch (e: Exception) {
