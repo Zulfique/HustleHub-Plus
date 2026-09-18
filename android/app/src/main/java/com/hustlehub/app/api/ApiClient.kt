@@ -19,7 +19,7 @@ import javax.net.ssl.X509TrustManager
 
 object ApiClient {
 
-    private const val BASE_URL = "https://10.0.2.2:3443/"
+    private const val BASE_URL = BuildConfig.HUSTLEHUB_BASE_URL
 
     private val gson: Gson = GsonBuilder().create()
 

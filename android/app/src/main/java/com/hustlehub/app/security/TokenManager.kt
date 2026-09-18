@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
-class TokenManager(context: Context) {
+class TokenManager(context: Context) : AuthStore {
 
     private val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -43,16 +43,7 @@ class TokenManager(context: Context) {
     fun isLoggedIn(): Boolean {
         val token = getToken() ?: return false
 
-        // Check storage age fallback for tokens without valid expiry claim
-        val savedAt = prefs.getLong(savedAtKey, 0L)
-        val storageAge = System.currentTimeMillis() - savedAt
-        if (savedAt > 0 && storageAge > ttlMs) {
-            // Token stored for more than 1 hour without expiry check - reject
-            clear()
-            return false
-        }
-
-        // Decode JWT to check actual exp claim
+        // Check token expiry using JWT exp claim
         try {
             val parts = token.split('.')
             if (parts.size != 3) {
@@ -60,9 +51,8 @@ class TokenManager(context: Context) {
                 return false
             }
             val payload = parts[1]
-            val base64Payload = if (payload.startsWith("~")) payload.drop(1) else payload
-            // Add padding if needed
-            val padded = base64Payload + "=".repeat((4 - base64Payload.length % 4) % 4)
+            // Add standard base64 padding
+            val padded = payload + "=".repeat((4 - payload.length % 4) % 4)
             val decodedJson = java.util.Base64.getDecoder().decode(padded)
             val jsonStr = String(decodedJson)
             val expIndex = jsonStr.indexOf("\"exp\"")
@@ -83,14 +73,18 @@ class TokenManager(context: Context) {
                     return false
                 }
             } else {
-                // No exp claim found - use storage age fallback
+                // No exp claim - use storage age fallback
+                val savedAt = prefs.getLong(savedAtKey, 0L)
+                val storageAge = System.currentTimeMillis() - savedAt
                 if (storageAge > ttlMs) {
                     clear()
                     return false
                 }
             }
         } catch (e: Exception) {
-            // If we can't decode the token, fall back to storage age check
+            // If we can't decode the token, use storage age fallback
+            val savedAt = prefs.getLong(savedAtKey, 0L)
+            val storageAge = System.currentTimeMillis() - savedAt
             if (savedAt > 0 && storageAge > ttlMs) {
                 clear()
                 return false
