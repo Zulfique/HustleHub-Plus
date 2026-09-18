@@ -11,11 +11,14 @@ Screenshots captured from the live application (Edge, 1280×900) via the DevTool
 | 3 | Register | `/register` | `web_03_register.png` |
 | 4 | Gig detail (public view) | `/gigs/:id` | `web_04_gig_detail.png` |
 | 5 | Client dashboard — my bookings (`alex@hustlehub.demo`) | `/dashboard` | `web_05_client_dashboard.png` |
-| 6 | Freelancer dashboard — my gigs (`zane@hustlehub.demo`) | `/dashboard/freelancer` | `web_06_freelancer_dashboard.png` |
+| 6 | Freelancer dashboard — my gigs (`zane@hustlehub.demo`) | `/dashboard/gigs` | `web_06_freelancer_dashboard.png` |
 | 7 | Gig form (create) | `/dashboard/new-gig` | `web_07_gig_form.png` |
 | 8 | Income + estimated tax | `/dashboard/income` | `web_08_income.png` |
 | 9 | 404 Not Found | `/does-not-exist` | `web_09_404.png` |
 | 10 | Home — live search results | `/` (query "seo") | `web_10_search.png` |
+| 11 | Freelancer bookings — bookings on my gigs | `/dashboard/bookings` | `web_11_freelancer_bookings.png` |
+| 12 | Gig form (edit, pre-filled) | `/dashboard/edit-gig/:id` | `web_12_gig_form_edit.png` |
+| 13 | Booking confirmation (inline) | `/gigs/:id` after Book | `web_13_booking_confirmed.png` |
 
 ## API responses (Part 1, Postman)
 
