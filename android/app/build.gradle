@@ -25,7 +25,9 @@ android {
             )
         }
         release {
-            // TODO: Replace with your actual production API hostname before release build
+            // TODO(Production): Replace with your actual production HTTPS API hostname
+            // before generating a release APK/AAB. Do not use 10.0.2.2 which is only for
+            // emulator development (debug build configuration).
             buildConfigField(
                 "String",
                 "HUSTLEHUB_BASE_URL",

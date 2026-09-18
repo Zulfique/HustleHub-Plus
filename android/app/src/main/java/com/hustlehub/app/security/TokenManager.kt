@@ -22,8 +22,6 @@ class TokenManager(context: Context) : AuthStore {
 
     private val jwtTokenKey = "jwt_token"
     private val userKey = "user_data"
-    private val savedAtKey = "saved_at"
-    private val ttlMs = 3600 * 1000L // 1 hour TTL
 
     private val gson = Gson()
 
@@ -31,7 +29,6 @@ class TokenManager(context: Context) : AuthStore {
         prefs.edit()
             .putString(jwtTokenKey, token)
             .putString(userKey, gson.toJson(user))
-            .putLong(savedAtKey, System.currentTimeMillis())
             .apply()
     }
 
