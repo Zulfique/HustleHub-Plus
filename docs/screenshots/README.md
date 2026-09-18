@@ -1,8 +1,24 @@
-# API Response Screenshots
+# Screenshots
 
-Capture each of the following requests in **Postman** and save the screenshot here. Each screenshot should show the request name, the response **status code**, and the **response time** in the frame (the footer bar in Postman shows both).
+Screenshots captured from the live application (Edge, 1280×900) via the DevTools Protocol and saved as PNGs. Filenames match the links in the root README table.
 
-Naming convention: use the exact filenames below so the links in the README table resolve.
+## Web UI (Part 2)
+
+| # | Screen | Route used | Filename |
+|---|--------|------------|----------|
+| 1 | Home — gig marketplace | `/` | `web_01_home.png` |
+| 2 | Login | `/login` | `web_02_login.png` |
+| 3 | Register | `/register` | `web_03_register.png` |
+| 4 | Gig detail (public view) | `/gigs/:id` | `web_04_gig_detail.png` |
+| 5 | Client dashboard — my bookings (`alex@hustlehub.demo`) | `/dashboard` | `web_05_client_dashboard.png` |
+| 6 | Freelancer dashboard — my gigs (`zane@hustlehub.demo`) | `/dashboard/freelancer` | `web_06_freelancer_dashboard.png` |
+| 7 | Gig form (create) | `/dashboard/gigs/new` | `web_07_gig_form.png` |
+| 8 | Income + estimated tax | `/dashboard/income` | `web_08_income.png` |
+| 9 | 404 Not Found | `/does-not-exist` | `web_09_404.png` |
+
+## API responses (Part 1, Postman)
+
+These were captured in Postman for the Part 1 milestone and show the request name, status code and response time in the footer. Keep the naming so the old README links resolve.
 
 | # | Request | Expected Status | Filename |
 |---|---------|-----------------|----------|
@@ -23,15 +39,9 @@ Naming convention: use the exact filenames below so the links in the README tabl
 | 15 | GET `/api/auth/profile` — Expired token | 401 | `15_profile_expired_token.png` |
 | 16 | GET `/api/unknown/route` — Not found | 404 | `16_404_unknown_route.png` |
 
-## Minimum required (from the brief)
+## How the web screenshots were captured
 
-If time is short, at minimum capture: #1, #2, #4 (409), #5 (400), #7 (login with token), #12 (profile 200), #13 (profile 401 no token), #14 (profile 401 bad token), and #16 (404).
-
-## Steps
-
-1. Start the backend: `cd backend && npm start`
-2. Open Postman and import `HustleHub+ Postman Collection.json`
-3. Set `baseUrl` to `https://localhost:3443` and disable SSL certificate verification (Settings → General)
-4. Run each request; a green check means the automated test in the request passed
-5. Screenshot each one with the status code and response time visible (the second line of the Postman response footer shows `Status` and `Time`)
-6. Save with the exact filenames above
+1. Start the backend and seed: `cd backend && npm start` then `npm run seed`
+2. Launch Edge with remote debugging: `msedge --remote-debugging-port=9222 --user-data-dir=<tmp> --ignore-certificate-errors about:blank`
+3. Drive via the DevTools Protocol (see `scripts/capture-screens.js`): navigate each route, log in as the demo account via `fetch`, take `Page.captureScreenshot` at 1280×900.
+4. Demo accounts (password `DemoPass1!`): `alex@hustlehub.demo` (client), `zane@hustlehub.demo` / `mia@hustlehub.demo` (freelancers).
