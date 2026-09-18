@@ -6,6 +6,7 @@ import com.hustlehub.app.HustleHubApplication
 import com.hustlehub.app.R
 import com.hustlehub.app.model.ErrorResponse
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.HttpException
@@ -23,31 +24,14 @@ object ApiClient {
 
     private val gson: Gson = GsonBuilder().create()
 
-    private fun buildTrustManager(): Pair<javax.net.ssl.SSLSocketFactory, X509TrustManager> {
-        val cf = CertificateFactory.getInstance("X.509")
-        val cert = HustleHubApplication.appContext.resources.openRawResource(R.raw.server_cert).use {
-            cf.generateCertificate(it) as X509Certificate
-        }
-
-        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-        keyStore.load(null, null)
-        keyStore.setCertificateEntry("hustlehub_backend", cert)
-
-        val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-        tmf.init(keyStore)
-        val trustManager = tmf.trustManagers[0] as X509TrustManager
-
-        val sslContext = SSLContext.getInstance("TLS")
-        sslContext.init(null, tmf.trustManagers, null)
-        return sslContext.socketFactory to trustManager
-    }
-
     private val okHttpClient: OkHttpClient by lazy {
-        val (sslSocketFactory, trustManager) = buildTrustManager()
+        val logging = HttpLoggingInterceptor()
+        logging.level(HttpLoggingInterceptor.Level.BASIC)
+
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
-            .sslSocketFactory(sslSocketFactory, trustManager)
+            .addInterceptor(logging)
             .build()
     }
 

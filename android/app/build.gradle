@@ -25,6 +25,7 @@ android {
             )
         }
         release {
+            // TODO: Replace with your actual production API hostname before release build
             buildConfigField(
                 "String",
                 "HUSTLEHUB_BASE_URL",
