@@ -1,5 +1,6 @@
 package com.hustlehub.app
 
+import com.hustlehub.app.BuildConfig
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -39,11 +40,13 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         binding.btnCopyToken.setOnClickListener {
-            val token = authStore.getToken()
-            if (token != null) {
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("JWT Token", token))
-                Toast.makeText(this, "Token copied to clipboard", Toast.LENGTH_SHORT).show()
+            if (BuildConfig.DEBUG) {
+                val token = authStore.getToken()
+                if (token != null) {
+                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("JWT Token", token))
+                    Toast.makeText(this, "Token copied to clipboard", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
