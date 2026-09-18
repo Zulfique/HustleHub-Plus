@@ -99,9 +99,7 @@ class DashboardActivity : AppCompatActivity() {
                 if (e is java.net.ConnectException || e is java.net.SocketTimeoutException) {
                     binding.tvConnection.text = getString(R.string.connection_unreachable)
                     binding.tvConnection.setTextColor(resources.getColor(R.color.hustlehub_danger, null))
-                    if (e is retrofit2.HttpException && e.code() == 401) {
-                        logoutExpired()
-                    }
+                    logoutExpired()
                 } else {
                     binding.tvConnection.text = getString(R.string.connection_error)
                     binding.tvConnection.setTextColor(resources.getColor(R.color.hustlehub_danger, null))
