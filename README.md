@@ -8,7 +8,7 @@ A secure full-stack freelance marketplace platform built with the **MERN** stack
 - **Postman collection**: [`HustleHub+ Postman Collection.json`](HustleHub%2B%20Postman%20Collection.json)
 - **Architecture diagram**: [`architecture-diagram.svg`](architecture-diagram.svg)
 - **Web & API response screenshots**: [`docs/screenshots/`](docs/screenshots/)
-- **Test suites**: backend Jest (61 tests), frontend Vitest (19 tests), end-to-end smoke (26 assertions), Postman/Newman (110 assertions)
+- **Test suites**: backend Jest (62 tests), frontend Vitest (20 tests), end-to-end smoke (26 assertions), Postman/Newman (110 assertions)
 
 ## Table of Contents
 
@@ -283,7 +283,7 @@ A Vite + React single-page app served by the backend itself (built `dist` mounte
 
 ## Android App
 
-A native Kotlin client in `android/` from Part 1 (Splash → Login → Register → Dashboard) using Retrofit + OkHttp with **certificate pinning** against the self-signed cert (`res/raw/server_cert.pem`) and AES-256-GCM token storage via `EncryptedSharedPreferences`. It shares the same backend and API envelope as the web app. See `android/` for the full structure. Rebuild after regenerating the backend certificate (the generator auto-syncs the pin).
+A native Kotlin client in `android/` from Part 1 (Splash → Login → Register → Dashboard) using Retrofit + OkHttp with **certificate trust anchoring** against the self-signed cert (`res/raw/server_cert.pem`) via Android Network Security Config AES-256-GCM token storage via `EncryptedSharedPreferences`. It shares the same backend and API envelope as the web app. See `android/` for the full structure. Rebuild after regenerating the backend certificate (the generator auto-syncs the pin).
 
 ---
 

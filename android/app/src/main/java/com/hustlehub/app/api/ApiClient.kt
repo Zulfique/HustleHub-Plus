@@ -2,6 +2,7 @@ package com.hustlehub.app.api
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.hustlehub.app.BuildConfig
 import com.hustlehub.app.model.ErrorResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -17,14 +18,20 @@ object ApiClient {
     private val gson: Gson = GsonBuilder().create()
 
     private val okHttpClient: OkHttpClient by lazy {
-        val logging = HttpLoggingInterceptor()
-        logging.level(HttpLoggingInterceptor.Level.BASIC)
-
-        OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .addInterceptor(logging)
-            .build()
+        if (BuildConfig.DEBUG) {
+            val logging = HttpLoggingInterceptor()
+            logging.level(HttpLoggingInterceptor.Level.BASIC)
+            OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .addInterceptor(logging)
+                .build()
+        } else {
+            OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .build()
+        }
     }
 
     val apiService: ApiService by lazy {
@@ -35,31 +42,3 @@ object ApiClient {
             .build()
             .create(ApiService::class.java)
     }
-
-    fun parseErrorMessage(e: Throwable): String {
-        return when (e) {
-            is HttpException -> {
-                try {
-                    val body = e.response()?.errorBody()?.string()
-                    val error = gson.fromJson(body, ErrorResponse::class.java)
-                    error.message ?: "Request failed (${e.code()})"
-                } catch (ex: Exception) {
-                    "Request failed (${e.code()})"
-                }
-            }
-            is java.net.ConnectException -> {
-                "Cannot reach server. Make sure the backend is running."
-            }
-            is java.net.UnknownHostException -> {
-                "Cannot reach server. Check network connection."
-            }
-            is javax.net.ssl.SSLException -> {
-                "SSL connection failed. Certificate mismatch."
-            }
-            is java.net.SocketTimeoutException -> {
-                "Request timed out. Server may be unreachable."
-            }
-            else -> e.message ?: "An unexpected error occurred"
-        }
-    }
-}
